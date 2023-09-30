@@ -3,9 +3,10 @@ const cors = require('cors');
 const mongoClient = require('mongodb').MongoClient;
 const crypto = require('crypto');
 const { log } = require('console');
-const spotifyInteraction = require('./helpers/spotifyAPIInteraction');
+const spotifyInteraction = require('./src/helpers/spotifyAPIInteraction');
 require('dotenv').config();
 const dbURI = process.env.DB_URI;
+const audit = require('express-requests-logger');
 
 function memorizeArtists(dbClient) {
     dbClient.db("SNM").collection("songs").find().project({_id:0,song:{artists:1}}).toArray().then(
@@ -20,8 +21,6 @@ function memorizeArtists(dbClient) {
                         await dbClient.db("SNM").collection("artists").insertOne({_id:artistId, artist:artist});
                 }
             }
-
-            
         }
     );
 }
@@ -36,110 +35,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(audit());
 
-app.get('/users', async (req, res) => {
-    let dbClient = await new mongoClient(dbURI).connect()
-    let users = await dbClient.db("SNM").collection('users').find().project({ "password": 0 }).toArray();
-    
-    return res.json(users);
-});
-
-app.get('/users/:id', async(req, res) => {
-    let id = req.params.id;
-
-    let dbClient = await new mongoClient(dbURI).connect();
-
-    let filter = 
-    {
-        $or: [
-            { "username": id },
-            { "email": id }
-        ]
-    };
-
-    let requestedUser = await dbClient.db("SNM").collection('users').find(filter).project({"password":0}).toArray();
-
-    if (requestedUser == null)
-        res.status(404).send("User not found");
-    else return res.json(requestedUser);
-});
-
-app.put("/users/:id", async (req, res) => {
-    let id = req.params.id;
-    let profile = req.body;
-
-    let dbClient = await new mongoClient(dbURI).connect();
-    let oldPassword = await dbClient.db("SNM").collection('users').find({username:id}).project({password:1,_id:0}).next();
-    oldPassword = oldPassword.password;
-    if (hash(profile.currentPassword) === oldPassword) {
-        let updatedData = {
-            $set : {
-                password: hash(profile.newPassword),
-                favouriteGenres: profile.selectedGenres,
-                favouriteArtists: profile.selectedArtists
-            }
-        } ;
-        let updatedUser = await dbClient.db("SNM").collection('users').updateOne({username:id}, updatedData);
-        return res.json(updatedUser);
-    }
-
-    res.status(403).send("Forbidden. Current password is wrong.")
-});
-
-app.delete("/users/:id", async (req, res) => {
-    let id = req.params.id;
-
-    let dbClient = await new mongoClient(dbURI).connect()
-    let filter = 
-    {
-        $or: [
-            { "username": id },
-            { "email": id }
-        ]
-    };
-
-    let deletedUser = await dbClient.db("SNM").collection('users').project({"password":0}).deleteOne(filter);
-
-    if(deletedUser == null)
-        res.status(404).send("User not found");
-    else return res.json(deletedUser);
-})
-
-app.post("/login", async (req, res) => {
-    let login = req.body;
-
-    if (login.username === undefined) {
-        res.status(400).send("Missing UserName");
-        return;
-    }
-
-    if (login.password === undefined) {
-        res.status(400).send("Missing Password");
-        return;
-    }
-
-    login.password = hash(login.password);
-
-    let dbClient = await new mongoClient(dbURI).connect()
-    let filter = {
-        $and: [{
-            $or: [
-                { "username": login.username },
-                { "email":login.username }
-            ]},
-            { "password": login.password }
-        ]
-    }
-    let loggedUser = await dbClient.db("SNM")
-        .collection('users')
-        .findOne(filter);
-
-    if (loggedUser == null) 
-        res.status(401).send("Utente non autorizzato.");
-    else return res.json(loggedUser);
-});
-
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
     let login = req.body;
 
     if (login.username === undefined) {
@@ -185,11 +83,116 @@ app.post('/register', async (req, res) => {
     let items;
     if (user == null){
         items = await dbClient.db("SNM").collection('users').insertOne(login);
-        
+
         return res.json(items);
     }
-    
+
     res.status(400).send("Utente già presente");
+});
+
+app.post("/api/login", async (req, res) => {
+    let login = req.body;
+
+    if (login.username === undefined) {
+        res.status(400).send("Missing UserName");
+        return;
+    }
+
+    if (login.password === undefined) {
+        res.status(400).send("Missing Password");
+        return;
+    }
+
+    login.password = hash(login.password);
+
+    let dbClient = await new mongoClient(dbURI).connect()
+    let filter = {
+        $and: [{
+            $or: [
+                { "username": login.username },
+                { "email":login.username }
+            ]},
+            { "password": login.password }
+        ]
+    }
+    let loggedUser = await dbClient.db("SNM")
+        .collection('users')
+        .findOne(filter);
+
+    if (loggedUser == null)
+        return res.status(400).send("Username or password incorrect.");
+
+    return res.json(loggedUser);
+});
+
+app.delete("/api/users/:id", verify, async (req, res) => {
+    let id = req.user.username;
+
+    if(id !== req.params.id) return res.status(403).send("You are not allowed to delete this user!");
+
+    let dbClient = await new mongoClient(dbURI).connect()
+    let filter =
+        {
+            $or: [
+                { "username": id },
+                { "email": id }
+            ]
+        };
+
+    let deletedUser = await dbClient.db("SNM").collection('users').project({"password":0}).deleteOne(filter);
+
+    if(deletedUser == null)
+        res.status(404).send("User not found");
+    else return res.json(deletedUser);
+})
+
+app.get('/users', async (req, res) => {
+    let dbClient = await new mongoClient(dbURI).connect()
+    let users = await dbClient.db("SNM").collection('users').find().project({ "password": 0 }).toArray();
+    
+    return res.json(users);
+});
+
+app.get('/users/:id', async(req, res) => {
+    let id = req.params.id;
+
+    let dbClient = await new mongoClient(dbURI).connect();
+
+    let filter = 
+    {
+        $or: [
+            { "username": id },
+            { "email": id }
+        ]
+    };
+
+    let requestedUser = await dbClient.db("SNM").collection('users').find(filter).project({"password":0}).toArray();
+
+    if (requestedUser == null)
+        return res.status(404).send("User not found");
+    return res.json(requestedUser);
+});
+
+app.put("/users/:id", async (req, res) => {
+    let id = req.params.id;
+    let profile = req.body;
+
+    let dbClient = await new mongoClient(dbURI).connect();
+    let oldPassword = await dbClient.db("SNM").collection('users').find({username:id}).project({password:1,_id:0}).next();
+    oldPassword = oldPassword.password;
+    if (hash(profile.currentPassword) === oldPassword) {
+        let updatedData = {
+            $set : {
+                password: hash(profile.newPassword),
+                favouriteGenres: profile.selectedGenres,
+                favouriteArtists: profile.selectedArtists
+            }
+        } ;
+        let updatedUser = await dbClient.db("SNM").collection('users').updateOne({username:id}, updatedData);
+        return res.json(updatedUser);
+    }
+
+    res.status(403).send("Forbidden. Current password is wrong.")
 });
 
 app.get("/artists", async (req, res) => {
