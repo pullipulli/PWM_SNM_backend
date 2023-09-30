@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
-const spotifyClientId = "b363b238785c48ec9f070b71a2afb11b";
-const spotifyClientSecret = "285848df0c6b4ecbaa4c14d63bb24424";
+const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
+const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 let spotifyAuthorizationID;
 
 function requestAuthorizationId() {
@@ -67,4 +67,21 @@ function requestAndMemorizeSongs(dbClient) {
     }).catch(e => console.log(e));
 }
 
-module.exports = {requestAndMemorizeGenres, requestAuthorizationId, requestAndMemorizeSongs};
+function memorizeArtists(dbClient) {
+    dbClient.db("SNM").collection("songs").find().project({_id:0,song:{artists:1}}).toArray().then(
+        async (result) => {
+            for(let i = 0; i < result.length; i++) {
+                let artists = result[i].song.artists;
+                for (let j = 0; j < artists.length; j++) {
+                    let artist = artists[j];
+                    let artistId = artist.id;
+                    let oldArtist = await dbClient.db("SNM").collection('artists').findOne({_id:artistId});
+                    if (oldArtist == null)
+                        await dbClient.db("SNM").collection("artists").insertOne({_id:artistId, artist:artist});
+                }
+            }
+        }
+    );
+}
+
+module.exports = {requestAndMemorizeGenres, requestAuthorizationId, requestAndMemorizeSongs, memorizeArtists};
