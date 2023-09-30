@@ -125,7 +125,7 @@ app.post("/api/login", async (req, res) => {
     return res.json(loggedUser);
 });
 
-app.delete("/api/users/:id", verify, async (req, res) => {
+app.delete("/api/users/:id", async (req, res) => {
     let id = req.user.username;
 
     if(id !== req.params.id) return res.status(403).send("You are not allowed to delete this user!");
