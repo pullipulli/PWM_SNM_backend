@@ -74,4 +74,4 @@ router.put("/:id", async (req, res) => {
     res.status(403).send("Forbidden. Current password is wrong.")
 });
 
-module.exports = router
+module.exports = router;

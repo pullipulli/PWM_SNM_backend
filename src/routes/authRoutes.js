@@ -32,6 +32,11 @@ router.post('/register', async (req, res) => {
         return;
     }
 
+    if (login.password1 === undefined) {
+        res.status(400).send("Missing Confirm Password");
+        return;
+    }
+
     if (login.favouriteArtists === undefined) {
         res.status(400).send("Missing Artist Preferences");
         return;
@@ -43,6 +48,9 @@ router.post('/register', async (req, res) => {
     }
 
     login.password = hash(login.password);
+    login.password1 = hash(login.password1);
+
+    if (login.password !== login.password1) return res.status(400).send("Password and confirm password must be equal!");
 
     let dbClient = await new mongoClient(dbURI).connect();
 
