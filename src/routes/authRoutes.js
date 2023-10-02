@@ -88,11 +88,11 @@ router.post("/login", async (req, res) => {
                 { "email":login.username }
             ]},
             { "password": login.password }
-        ]
+        ],
     }
     let loggedUser = await dbClient.db("SNM")
         .collection('users')
-        .findOne(filter);
+        .findOne(filter, {projection: {"password": 0}})
 
     if (loggedUser == null)
         return res.status(400).send("Username or password incorrect.");
