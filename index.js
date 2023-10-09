@@ -1,11 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const mongoClient = require('mongodb').MongoClient;
-const { log } = require('console');
+const {log} = require('console');
 require('dotenv').config();
 const spotifyInteraction = require('./src/helpers/spotifyAPIInteraction');
 const dbURI = process.env.DB_URI;
-const audit = require('express-requests-logger');
+const logRoute = require('./src/middlewares/logRoute');
 
 const app = express();
 const router = express.Router()
@@ -19,7 +19,7 @@ const playlistRoutes = require('./src/routes/playlistRoutes');
 
 app.use(cors());
 app.use(express.json());
-app.use(audit());
+app.use(logRoute);
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -37,16 +37,16 @@ app.listen(3100, "0.0.0.0", async () => {
     dbClient = await new mongoClient(dbURI).connect();
 
     spotifyInteraction.requestAuthorizationId()
-    .then((response) => {
-        spotifyInteraction.requestAndMemorizeGenres(dbClient);
-    })
-    .then((response) => {
-        spotifyInteraction.requestAndMemorizeSongs(dbClient);
-    })
-    .then(async (response) => {
-        spotifyInteraction.memorizeArtists(dbClient);
-    })
-    .catch((e) => console.log(e));
+        .then((response) => {
+            spotifyInteraction.requestAndMemorizeGenres(dbClient);
+        })
+        .then((response) => {
+            spotifyInteraction.requestAndMemorizeSongs(dbClient);
+        })
+        .then(async (response) => {
+            spotifyInteraction.memorizeArtists(dbClient);
+        })
+        .catch((e) => console.log(e));
 });
 
 
