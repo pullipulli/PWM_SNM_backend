@@ -6,9 +6,10 @@ require('dotenv').config();
 const spotifyInteraction = require('./src/helpers/spotifyAPIInteraction');
 const dbURI = process.env.DB_URI;
 const logRoute = require('./src/middlewares/logRoute');
-
 const app = express();
 const router = express.Router()
+
+//TODO implementare swagger
 
 const authRoutes = require('./src/routes/authRoutes');
 const userRoutes = require('./src/routes/userRoutes');
