@@ -17,22 +17,36 @@ router.get("/:owner", async (req, res) => {
     res.json(playlists);
 });
 
-router.get("/:owner/:name", async (req, res) => {
+//TODO route per modificare una playlist
+
+router.delete("/:owner/:name", async (req, res) => {
     const owner = req.params.owner;
-    const playlistName = req.params.name;
+    const name = req.params.name;
 
-    if (owner === undefined || playlistName === undefined) return res.status(400).send("Bad request");
+    if (owner === undefined) {
+        res.status(400).send("Missing UserName of the playlist owner");
+        return;
+    }
 
-    let dbClient = await new mongoClient(dbURI).connect();
+    if (name === undefined) {
+        res.status(400).send("Missing Playlist Name");
+        return;
+    }
 
-    let playlist = await dbClient.db("SNM").collection("playlists").findOne({
-        _id: {
-            name: playlistName,
-            owner: owner
-        }
-    });
+    try {
+        let dbClient = await new mongoClient(dbURI).connect();
 
-    res.json(playlist);
+        await dbClient.db("SNM").collection("playlists").deleteOne({
+            _id: {
+                name,
+                owner
+            }
+        });
+    } catch (e) {
+        res.status(404).send("Playlist not found");
+    }
+
+
 });
 
 router.post("/", async (req, res) => {
@@ -68,6 +82,8 @@ router.post("/", async (req, res) => {
     }
 
     playlist.tags = playlist.tags.toString().trim().split('#');
+
+    playlist.tags = playlist.tags.filter((tag) => tag.trim() !== "");
 
     let dbClient = await new mongoClient(dbURI).connect();
 
