@@ -18,9 +18,9 @@ router.get("/:owner", async (req, res) => {
 });
 
 function parseTags(stringTags) {
-    let tags = stringTags.tags.toString().trim().split('#');
+    let tags = stringTags.toString().trim().split('#');
 
-    return tags.tags.filter((tag) => tag.trim() !== "");
+    return tags.filter((tag) => tag.trim() !== "");
 }
 
 //TODO modifica e eliminazione delle playlist SOLO per gli owner
