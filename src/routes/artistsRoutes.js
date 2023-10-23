@@ -7,6 +7,8 @@ router.get("/", async (req, res) => {
     let dbClient = await new mongoClient(dbURI).connect();
     let artists = await dbClient.db("SNM").collection("artists").find().sort('artist.name').toArray();
 
+    await dbClient.close();
+
     if (artists != null)
         return res.json(artists);
     res.status(404).send("Artists not found");

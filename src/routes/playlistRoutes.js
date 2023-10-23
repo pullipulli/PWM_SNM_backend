@@ -14,6 +14,8 @@ router.get("/:owner", async (req, res) => {
         '_id.owner': owner
     }).toArray();
 
+    await dbClient.close();
+
     res.json(playlists);
 });
 
@@ -23,8 +25,8 @@ function parseTags(stringTags) {
     return tags.filter((tag) => tag.trim() !== "");
 }
 
-//TODO modifica e eliminazione delle playlist SOLO per gli owner
-//TODO copy playlist
+// TODO modifica e eliminazione delle playlist SOLO per gli owner di esse
+// TODO copy playlist
 router.put("/:owner/:name", async (req, res) => {
     //TODO check null/undefined for optional attributes
     const owner = req.params.owner;
@@ -62,6 +64,8 @@ router.put("/:owner/:name", async (req, res) => {
             description: newPlaylist.description,
             tags: newPlaylist.tags
         });
+
+        await dbClient.close();
     } catch (e) {
         res.status(404).send("Playlist not found");
     }
@@ -90,6 +94,8 @@ router.delete("/:owner/:name", async (req, res) => {
                 owner
             }
         });
+
+        await dbClient.close();
     } catch (e) {
         res.status(404).send("Playlist not found");
     }
@@ -145,6 +151,8 @@ router.post("/", async (req, res) => {
         delete playlist.name;
         delete playlist.owner;
         items = await dbClient.db("SNM").collection('playlists').insertOne(playlist);
+
+        await dbClient.close();
 
         return res.json(items);
     }

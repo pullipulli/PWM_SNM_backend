@@ -35,17 +35,18 @@ app.listen(3100, "0.0.0.0", async () => {
     log("Server partito sulla porta 3100.");
     let dbClient;
 
-    dbClient = await new mongoClient(dbURI).connect();
-
     spotifyInteraction.requestAuthorizationId()
-        .then((response) => {
-            spotifyInteraction.requestAndMemorizeGenres(dbClient);
-        })
-        .then((response) => {
-            spotifyInteraction.requestAndMemorizeSongs(dbClient);
+        .then(async (response) => {
+            dbClient = await new mongoClient(dbURI).connect();
+            await spotifyInteraction.requestAndMemorizeGenres(dbClient);
         })
         .then(async (response) => {
-            spotifyInteraction.memorizeArtists(dbClient);
+            dbClient = await new mongoClient(dbURI).connect();
+            await spotifyInteraction.requestAndMemorizeSongs(dbClient);
+        })
+        .then(async (response) => {
+            dbClient = await new mongoClient(dbURI).connect();
+            await spotifyInteraction.memorizeArtists(dbClient);
         })
         .catch((e) => console.log(e));
 });

@@ -5,7 +5,9 @@ const router = express.Router()
 
 router.get("/", async (req, res) => {
     let dbClient = await new mongoClient(dbURI).connect();
-    let genres = await dbClient.db("SNM").collection("genres").find().sort({_id:1}).toArray();
+    let genres = await dbClient.db("SNM").collection("genres").find().sort({_id: 1}).toArray();
+
+    await dbClient.close();
 
     if (genres != null)
         return res.json(genres);

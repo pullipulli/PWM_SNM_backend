@@ -20,6 +20,8 @@ router.delete("/:id", async (req, res) => {
 
     let deletedUser = await dbClient.db("SNM").collection('users').project({"password": 0}).deleteOne(filter);
 
+    await dbClient.close();
+
     if (deletedUser == null)
         res.status(404).send("User not found");
     else return res.json(deletedUser);
@@ -28,6 +30,8 @@ router.delete("/:id", async (req, res) => {
 router.get('/', async (req, res) => {
     let dbClient = await new mongoClient(dbURI).connect()
     let users = await dbClient.db("SNM").collection('users').find().project({"password": 0}).toArray();
+
+    await dbClient.close();
 
     return res.json(users);
 });
@@ -46,6 +50,8 @@ router.get('/:id', async (req, res) => {
         };
 
     let requestedUser = await dbClient.db("SNM").collection('users').find(filter).project({"password": 0}).toArray();
+
+    await dbClient.close();
 
     if (requestedUser == null)
         return res.status(404).send("User not found");
@@ -77,6 +83,9 @@ router.put("/:id", async (req, res) => {
     };
     await dbClient.db("SNM").collection('users').updateOne({username: id}, updatedData);
     let user = await dbClient.db("SNM").collection('users').find({username: id}).project({password: 0}).toArray();
+
+    await dbClient.close();
+
     return res.json(user[0]);
 });
 

@@ -4,6 +4,8 @@ const router = express.Router();
 const hash = require('../helpers/hash');
 const dbURI = process.env.DB_URI;
 
+// TODO implementa accesso con express-session
+
 router.post('/register', async (req, res) => {
     let login = req.body;
 
@@ -54,13 +56,15 @@ router.post('/register', async (req, res) => {
 
     let dbClient = await new mongoClient(dbURI).connect();
 
-    let user = await dbClient.db("SNM").collection("users").findOne({"username": login.username, "email":login.email});
+    let user = await dbClient.db("SNM").collection("users").findOne({"username": login.username, "email": login.email});
     let items;
-    if (user == null){
+    if (user == null) {
         items = await dbClient.db("SNM").collection('users').insertOne(login);
 
         return res.json(items);
     }
+
+    await dbClient.close();
 
     res.status(400).send("Utente già presente");
 });
@@ -84,15 +88,18 @@ router.post("/login", async (req, res) => {
     let filter = {
         $and: [{
             $or: [
-                { "username": login.username },
-                { "email":login.username }
-            ]},
-            { "password": login.password }
+                {"username": login.username},
+                {"email": login.username}
+            ]
+        },
+            {"password": login.password}
         ],
     }
     let loggedUser = await dbClient.db("SNM")
         .collection('users')
         .findOne(filter, {projection: {"password": 0}})
+
+    await dbClient.close();
 
     if (loggedUser == null)
         return res.status(400).send("Username or password incorrect.");
