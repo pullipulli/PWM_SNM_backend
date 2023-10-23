@@ -17,7 +17,55 @@ router.get("/:owner", async (req, res) => {
     res.json(playlists);
 });
 
-//TODO route per modificare una playlist
+function parseTags(stringTags) {
+    let tags = stringTags.tags.toString().trim().split('#');
+
+    return tags.tags.filter((tag) => tag.trim() !== "");
+}
+
+//TODO modifica e eliminazione delle playlist SOLO per gli owner
+//TODO copy playlist
+router.put("/:owner/:name", async (req, res) => {
+    //TODO check null/undefined for optional attributes
+    const owner = req.params.owner;
+    const name = req.params.name;
+
+    const newPlaylist = req.body;
+
+    if (owner === undefined) {
+        res.status(400).send("Missing UserName of the playlist owner");
+        return;
+    }
+
+    if (name === undefined) {
+        res.status(400).send("Missing Playlist Name");
+        return;
+    }
+
+    newPlaylist.tags = parseTags(newPlaylist.tags);
+
+    try {
+        let dbClient = await new mongoClient(dbURI).connect();
+
+        await dbClient.db("SNM").collection("playlists").updateOne({
+            _id: {
+                name,
+                owner
+            }
+        }, {
+            _id: {
+                name: newPlaylist.name,
+                owner
+            },
+            songs: newPlaylist.songs,
+            privacy: newPlaylist.privacy,
+            description: newPlaylist.description,
+            tags: newPlaylist.tags
+        });
+    } catch (e) {
+        res.status(404).send("Playlist not found");
+    }
+});
 
 router.delete("/:owner/:name", async (req, res) => {
     const owner = req.params.owner;
@@ -81,9 +129,7 @@ router.post("/", async (req, res) => {
         res.status(400).send("Missing PLaylist tags");
     }
 
-    playlist.tags = playlist.tags.toString().trim().split('#');
-
-    playlist.tags = playlist.tags.filter((tag) => tag.trim() !== "");
+    playlist.tags = parseTags(playlist.tags);
 
     let dbClient = await new mongoClient(dbURI).connect();
 
