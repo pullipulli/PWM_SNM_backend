@@ -30,7 +30,7 @@ function parseTags(stringTags) {
 router.put("/:owner/:name", async (req, res) => {
     //TODO check null/undefined for optional attributes
     const owner = req.params.owner;
-    const name = req.params.name;
+    const oldName = req.params.name;
 
     const newPlaylist = req.body;
 
@@ -39,7 +39,7 @@ router.put("/:owner/:name", async (req, res) => {
         return;
     }
 
-    if (name === undefined) {
+    if (oldName === undefined) {
         res.status(400).send("Missing Playlist Name");
         return;
     }
@@ -49,24 +49,29 @@ router.put("/:owner/:name", async (req, res) => {
     try {
         let dbClient = await new mongoClient(dbURI).connect();
 
+        //TODO così non può funzionare, devi prima eliminare il vecchio documento, e poi crearne uno nuovo
+
         await dbClient.db("SNM").collection("playlists").updateOne({
             _id: {
-                name,
-                owner
+                name: oldName,
+                owner: owner
             }
         }, {
-            _id: {
-                name: newPlaylist.name,
-                owner
-            },
-            songs: newPlaylist.songs,
-            privacy: newPlaylist.privacy,
-            description: newPlaylist.description,
-            tags: newPlaylist.tags
+            $set: {
+                _id: {
+                    name: newPlaylist.name,
+                    owner
+                },
+                songs: newPlaylist.songs,
+                privacy: newPlaylist.privacy,
+                description: newPlaylist.description,
+                tags: newPlaylist.tags
+            }
         });
 
         await dbClient.close();
     } catch (e) {
+        console.log(e);
         res.status(404).send("Playlist not found");
     }
 });
