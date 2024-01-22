@@ -3,6 +3,29 @@ const {MongoClient: mongoClient} = require("mongodb");
 const dbURI = process.env.DB_URI;
 const router = express.Router()
 
+router.get("/:owner/:playlistName", async (req, res) => {
+    const owner = req.params.owner;
+    const playlistName = req.params.playlistName;
+
+    if (owner === undefined) return res.status(400).send("Bad request");
+    if (playlistName === undefined) return res.status(400).send("Bad request");
+
+    let dbClient = await new mongoClient(dbURI).connect();
+
+    let playlist = await dbClient.db("SNM").collection("playlists").findOne(
+        {
+            _id: {
+                name: playlistName,
+                owner: owner
+            }
+        }
+    );
+
+    await dbClient.close();
+
+    res.json(playlist);
+});
+
 router.get("/:owner", async (req, res) => {
     const owner = req.params.owner;
 
