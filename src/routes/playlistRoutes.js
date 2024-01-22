@@ -49,27 +49,28 @@ router.put("/:owner/:name", async (req, res) => {
     try {
         let dbClient = await new mongoClient(dbURI).connect();
 
-        //TODO così non può funzionare, devi prima eliminare il vecchio documento, e poi crearne uno nuovo
-
-        await dbClient.db("SNM").collection("playlists").updateOne({
+        await dbClient.db("SNM").collection("playlists").deleteOne({
             _id: {
                 name: oldName,
                 owner: owner
             }
-        }, {
-            $set: {
-                _id: {
-                    name: newPlaylist.name,
-                    owner
-                },
-                songs: newPlaylist.songs,
-                privacy: newPlaylist.privacy,
-                description: newPlaylist.description,
-                tags: newPlaylist.tags
-            }
+        });
+
+
+        let items = await dbClient.db("SNM").collection("playlists").insertOne({
+            _id: {
+                name: newPlaylist.name,
+                owner
+            },
+            songs: newPlaylist.songs,
+            privacy: newPlaylist.privacy,
+            description: newPlaylist.description,
+            tags: newPlaylist.tags
         });
 
         await dbClient.close();
+
+        return res.json(items);
     } catch (e) {
         console.log(e);
         res.status(404).send("Playlist not found");
@@ -101,6 +102,8 @@ router.delete("/:owner/:name", async (req, res) => {
         });
 
         await dbClient.close();
+
+        return res.json('OK. Deleted');
     } catch (e) {
         res.status(404).send("Playlist not found");
     }
