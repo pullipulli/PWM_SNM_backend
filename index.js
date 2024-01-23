@@ -26,6 +26,7 @@ const artistsRoutes = require('./src/routes/artistsRoutes');
 const genresRoutes = require('./src/routes/genresRoutes');
 const songsRoutes = require('./src/routes/songsRoutes');
 const playlistRoutes = require('./src/routes/playlistRoutes');
+const publicPlaylistsRoutes = require('./src/routes/publicPlaylistsRoutes');
 
 app.use(cors());
 app.use(express.json());
@@ -37,6 +38,7 @@ router.use('/artists', artistsRoutes);
 router.use('/genres', genresRoutes);
 router.use('/songs', songsRoutes);
 router.use('/playlist', playlistRoutes);
+router.use('/publicPlaylists', publicPlaylistsRoutes);
 
 app.use('/api', router);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

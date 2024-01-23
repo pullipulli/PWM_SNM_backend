@@ -164,6 +164,7 @@ router.post("/", async (req, res) => {
 
     if (playlist.tags === undefined) {
         res.status(400).send("Missing PLaylist tags");
+        return;
     }
 
     playlist.tags = parseTags(playlist.tags);
