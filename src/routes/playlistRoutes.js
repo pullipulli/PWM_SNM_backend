@@ -6,6 +6,7 @@ const router = express.Router()
 router.get("/:owner/:playlistName", async (req, res) => {
     const owner = req.params.owner;
     const playlistName = req.params.playlistName;
+    const loggedUser = req.headers.authorization;
 
     if (owner === undefined) return res.status(400).send("Bad request");
     if (playlistName === undefined) return res.status(400).send("Bad request");
@@ -23,19 +24,26 @@ router.get("/:owner/:playlistName", async (req, res) => {
 
     await dbClient.close();
 
+    if (loggedUser !== owner && playlist.privacy === 'private') return res.status(403).send("Not authorized!");
+
     res.json(playlist);
 });
 
 router.get("/:owner", async (req, res) => {
     const owner = req.params.owner;
+    const loggedUser = req.headers.authorization;
 
     if (owner === undefined) return res.status(400).send("Bad request");
 
     let dbClient = await new mongoClient(dbURI).connect();
 
-    let playlists = await dbClient.db("SNM").collection("playlists").find({
+    let filter = {
         '_id.owner': owner
-    }).toArray();
+    };
+
+    if (loggedUser !== owner) filter.privacy = 'public';
+
+    let playlists = await dbClient.db("SNM").collection("playlists").find(filter).toArray();
 
     await dbClient.close();
 
@@ -48,12 +56,10 @@ function parseTags(stringTags) {
     return tags.filter((tag) => tag.trim() !== "");
 }
 
-// TODO modifica e eliminazione delle playlist SOLO per gli owner di esse
-// TODO copy playlist
 router.put("/:owner/:name", async (req, res) => {
-    //TODO check null/undefined for optional attributes
     const owner = req.params.owner;
     const oldName = req.params.name;
+    const loggedUser = req.headers.authorization;
 
     const newPlaylist = req.body;
 
@@ -71,6 +77,15 @@ router.put("/:owner/:name", async (req, res) => {
 
     try {
         let dbClient = await new mongoClient(dbURI).connect();
+
+        const playlist = await dbClient.db("SNM").collection("playlists").findOne({
+            _id: {
+                name: oldName,
+                owner: owner
+            }
+        });
+
+        if (playlist.privacy === 'private' && loggedUser !== owner) return res.status(403).send("Not authorized!");
 
         await dbClient.db("SNM").collection("playlists").deleteOne({
             _id: {
@@ -103,6 +118,7 @@ router.put("/:owner/:name", async (req, res) => {
 router.delete("/:owner/:name", async (req, res) => {
     const owner = req.params.owner;
     const name = req.params.name;
+    const loggedUser = req.headers.authorization;
 
     if (owner === undefined) {
         res.status(400).send("Missing UserName of the playlist owner");
@@ -116,6 +132,15 @@ router.delete("/:owner/:name", async (req, res) => {
 
     try {
         let dbClient = await new mongoClient(dbURI).connect();
+
+        const playlist = await dbClient.db("SNM").collection("playlists").findOne({
+            _id: {
+                name: name,
+                owner: owner
+            }
+        });
+
+        if (playlist.privacy === 'private' && loggedUser !== owner) return res.status(403).send("Not authorized!");
 
         await dbClient.db("SNM").collection("playlists").deleteOne({
             _id: {
@@ -136,6 +161,7 @@ router.delete("/:owner/:name", async (req, res) => {
 
 router.post("/", async (req, res) => {
     let playlist = req.body;
+    const loggedUser = req.headers.authorization;
 
     if (playlist.owner === undefined) {
         res.status(400).send("Missing UserName of the playlist owner");
@@ -166,6 +192,8 @@ router.post("/", async (req, res) => {
         res.status(400).send("Missing PLaylist tags");
         return;
     }
+
+    if (playlist.owner !== loggedUser) return res.status(403).send("Not authorized!");
 
     playlist.tags = parseTags(playlist.tags);
 
