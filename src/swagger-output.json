@@ -396,7 +396,7 @@
         "tags": [
           "playlists"
         ],
-        "summary": "Vengono restituite tutte le playlist dell",
+        "summary": "Vengono restituite tutte le playlist dell'owner (solo quelle pubbliche se l'utente loggato non è l'owner)",
         "description": "",
         "parameters": [
           {
@@ -608,7 +608,7 @@
         "tags": [
           "playlists"
         ],
-        "summary": "Vengono restituite tutte le playlist pubbliche che sono all",
+        "summary": "Vengono restituite tutte le playlist pubbliche che sono all'interno del database",
         "description": "",
         "responses": {
           "200": {

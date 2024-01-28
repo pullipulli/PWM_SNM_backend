@@ -52,7 +52,7 @@ router.get("/:owner/:playlistName", async (req, res) => {
 
 router.get("/:owner", async (req, res) => {
     /* #swagger.tags = ['playlists']
-       #swagger.summary = 'Vengono restituite tutte le playlist dell'owner (solo quelle pubbliche se l'utente loggato non è l'owner)'
+       #swagger.summary = "Vengono restituite tutte le playlist dell'owner (solo quelle pubbliche se l'utente loggato non è l'owner)"
        #swagger.parameters['owner'] = {
             in: 'path',
             description: 'Username del proprietario della playlist',

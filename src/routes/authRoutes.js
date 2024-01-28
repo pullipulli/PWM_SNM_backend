@@ -75,6 +75,9 @@ router.post('/register', async (req, res) => {
 
     let user = await dbClient.db("SNM").collection("users").findOne({"username": login.username, "email": login.email});
     let items;
+
+    delete login.password1;
+
     if (user == null) {
         items = await dbClient.db("SNM").collection('users').insertOne(login);
 
