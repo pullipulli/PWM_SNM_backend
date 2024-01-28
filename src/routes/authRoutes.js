@@ -5,8 +5,25 @@ const hash = require('../helpers/hash');
 const dbURI = process.env.DB_URI;
 
 router.post('/register', async (req, res) => {
-    // #swagger.tags = ['auth']
-    // #swagger.summary = 'Registra un utente alla piattaforma'
+    /* #swagger.tags = ['auth']
+     #swagger.summary = 'Registra un utente alla piattaforma'
+     #swagger.parameters['body'] = {
+          in: 'body',
+          description: 'User registration Data',
+          required: true,
+          schema : {
+            username: "username",
+            name: "name",
+            surname: "surname",
+            email: "email@it",
+            password: "pwd",
+            password1: "pwd",
+            favouriteArtists: [],
+            favouriteGenres: []
+          }
+     }
+     #swagger.responses[400] = { description: "Manca uno qualsiasi dei parametri che dovrebbero essere nel body. Inoltre password e password1 dovrebbero essere uguali." }
+    */
     let login = req.body;
 
     if (login.username === undefined) {
@@ -70,8 +87,19 @@ router.post('/register', async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-    // #swagger.tags = ['auth']
-    // #swagger.summary = 'Fa eseguire l'accesso a SNM ad un utente'
+    /*  #swagger.tags = ['auth']
+        #swagger.summary = "Fa eseguire l'accesso a SNM ad un utente"
+        #swagger.parameters['body'] = {
+          in: 'body',
+          description: 'User login Data',
+          required: true,
+          schema : {
+            username: "username/email",
+            password: "pwd",
+          }
+     }
+     #swagger.responses[400] = { description: "Mancano o l'username o la password (Oppure è stata inserita una combinazione errata)" }
+     */
     let login = req.body;
 
     if (login.username === undefined) {

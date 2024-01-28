@@ -17,8 +17,15 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-    // #swagger.tags = ['songs']
-    // #swagger.summary = 'Viene restituita un\'unica canzone con un certo id'
+    /* #swagger.tags = ['songs']
+       #swagger.summary = "Viene restituita un'unica canzone con un certo id"
+       #swagger.parameters['id'] = {
+            in: 'path',
+            description: 'Song ID.',
+            required: true,
+            type: 'string'
+       }
+    */
     let id = req.params.id;
     let dbClient = await new mongoClient(dbURI).connect();
     let song = await dbClient.db("SNM").collection("songs").find({"_id": id}).toArray();

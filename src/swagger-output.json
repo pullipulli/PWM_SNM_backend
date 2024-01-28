@@ -39,37 +39,53 @@
   "paths": {
     "/api/auth/register": {
       "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Registra un utente alla piattaforma",
         "description": "",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "description": "User registration Data",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "username": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "username"
                 },
                 "name": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "name"
                 },
                 "surname": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "surname"
                 },
                 "email": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "email@it"
                 },
                 "password": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "pwd"
                 },
                 "password1": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "pwd"
                 },
                 "favouriteArtists": {
-                  "example": "any"
+                  "type": "array",
+                  "example": [],
+                  "items": {}
                 },
                 "favouriteGenres": {
-                  "example": "any"
+                  "type": "array",
+                  "example": [],
+                  "items": {}
                 }
               }
             }
@@ -80,26 +96,34 @@
             "description": "OK"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Manca uno qualsiasi dei parametri che dovrebbero essere nel body. Inoltre password e password1 dovrebbero essere uguali."
           }
         }
       }
     },
     "/api/auth/login": {
       "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Fa eseguire l'accesso a SNM ad un utente",
         "description": "",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "description": "User login Data",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "username": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "username/email"
                 },
                 "password": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "pwd"
                 }
               }
             }
@@ -110,19 +134,29 @@
             "description": "OK"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Mancano o l'username o la password (Oppure è stata inserita una combinazione errata)"
           }
         }
       }
     },
     "/api/users/{id}": {
       "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Elimino un utente specifico",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
+            "type": "string",
+            "description": "Username o email dell'utente da eliminare."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
             "type": "string"
           }
         ],
@@ -139,13 +173,18 @@
         }
       },
       "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Viene restituito un singolo utente",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Username o email dell'utente di cui si vogliono i dati."
           }
         ],
         "responses": {
@@ -158,34 +197,53 @@
         }
       },
       "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Viene modificato il profilo di un utente",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
+            "type": "string",
+            "description": "Username o email dell'utente da modificare."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
             "type": "string"
           },
           {
             "name": "body",
             "in": "body",
+            "description": "Request body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "currentPassword": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "current"
                 },
                 "newPassword": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "newPsw"
                 },
                 "newPassword1": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "newPsw"
                 },
                 "favouriteGenres": {
-                  "example": "any"
+                  "type": "array",
+                  "example": [],
+                  "items": {}
                 },
                 "favouriteArtists": {
-                  "example": "any"
+                  "type": "array",
+                  "example": [],
+                  "items": {}
                 }
               }
             }
@@ -194,12 +252,19 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         }
       }
     },
     "/api/users/": {
       "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Viene restituito un array di utenti",
         "description": "",
         "responses": {
           "200": {
@@ -210,6 +275,10 @@
     },
     "/api/artists/": {
       "get": {
+        "tags": [
+          "artists"
+        ],
+        "summary": "Viene restituito un array che contiene tutti gli artisti memorizzati nel database",
         "description": "",
         "responses": {
           "200": {
@@ -223,6 +292,10 @@
     },
     "/api/genres/": {
       "get": {
+        "tags": [
+          "genres"
+        ],
+        "summary": "Viene restituito un array che contiene tutti i generi musicali memorizzati nel database",
         "description": "",
         "responses": {
           "200": {
@@ -236,6 +309,10 @@
     },
     "/api/songs/": {
       "get": {
+        "tags": [
+          "songs"
+        ],
+        "summary": "Viene restituito un array di canzoni",
         "description": "",
         "responses": {
           "200": {
@@ -249,13 +326,18 @@
     },
     "/api/songs/{id}": {
       "get": {
+        "tags": [
+          "songs"
+        ],
+        "summary": "Viene restituita un'unica canzone con un certo id",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Song ID."
           }
         ],
         "responses": {
@@ -270,19 +352,25 @@
     },
     "/api/playlist/{owner}/{playlistName}": {
       "get": {
+        "tags": [
+          "playlists"
+        ],
+        "summary": "Viene restituita una singola playlist (identificata da owner e nome della playlist)",
         "description": "",
         "parameters": [
           {
             "name": "owner",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Username del proprietario della playlist"
           },
           {
             "name": "playlistName",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Nome della playlist"
           },
           {
             "name": "authorization",
@@ -305,13 +393,18 @@
     },
     "/api/playlist/{owner}": {
       "get": {
+        "tags": [
+          "playlists"
+        ],
+        "summary": "Vengono restituite tutte le playlist dell",
         "description": "",
         "parameters": [
           {
             "name": "owner",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Username del proprietario della playlist"
           },
           {
             "name": "authorization",
@@ -331,19 +424,25 @@
     },
     "/api/playlist/{owner}/{name}": {
       "put": {
+        "tags": [
+          "playlists"
+        ],
+        "summary": "Modifico i dati di una singola playlist",
         "description": "",
         "parameters": [
           {
             "name": "owner",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Username del proprietario della playlist"
           },
           {
             "name": "name",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Vecchio nome della playlist"
           },
           {
             "name": "authorization",
@@ -353,23 +452,31 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Request body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "tags": {
-                  "example": "any"
-                },
                 "name": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "PlaylistName"
                 },
                 "songs": {
-                  "example": "any"
+                  "type": "array",
+                  "example": [],
+                  "items": {}
+                },
+                "tags": {
+                  "type": "string",
+                  "example": "#Dei#Tag#A#Caso"
                 },
                 "privacy": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "public"
                 },
                 "description": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "Descrizione della playlist"
                 }
               }
             }
@@ -391,19 +498,25 @@
         }
       },
       "delete": {
+        "tags": [
+          "playlists"
+        ],
+        "summary": "Elimino una playlist specifica",
         "description": "",
         "parameters": [
           {
             "name": "owner",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Username del proprietario della playlist"
           },
           {
             "name": "name",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Nome della playlist"
           },
           {
             "name": "authorization",
@@ -429,6 +542,10 @@
     },
     "/api/playlist/": {
       "post": {
+        "tags": [
+          "playlists"
+        ],
+        "summary": "Inserisco una nuova playlist",
         "description": "",
         "parameters": [
           {
@@ -439,29 +556,35 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Request body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "owner": {
-                  "example": "any"
-                },
                 "name": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "PlaylistName"
+                },
+                "owner": {
+                  "type": "string",
+                  "example": "ownerUsername"
                 },
                 "songs": {
-                  "example": "any"
-                },
-                "description": {
-                  "example": "any"
-                },
-                "privacy": {
-                  "example": "any"
+                  "type": "array",
+                  "example": [],
+                  "items": {}
                 },
                 "tags": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "#Dei#Tag#A#Caso"
                 },
-                "_id": {
-                  "example": "any"
+                "privacy": {
+                  "type": "string",
+                  "example": "public"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Descrizione della playlist"
                 }
               }
             }
@@ -482,6 +605,10 @@
     },
     "/api/publicPlaylists/": {
       "get": {
+        "tags": [
+          "playlists"
+        ],
+        "summary": "Vengono restituite tutte le playlist pubbliche che sono all",
         "description": "",
         "responses": {
           "200": {

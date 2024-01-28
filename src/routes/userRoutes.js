@@ -5,8 +5,21 @@ const router = express.Router()
 const hash = require('../helpers/hash');
 
 router.delete("/:id", async (req, res) => {
-    // #swagger.tags = ['user']
-    // #swagger.summary = 'Elimino un utente specifico'
+    /* #swagger.tags = ['user']
+       #swagger.summary = 'Elimino un utente specifico'
+       #swagger.parameters['id'] = {
+            in: 'path',
+            description: "Username o email dell\'utente da eliminare.",
+            required: true,
+            type: 'string'
+       }
+       #swagger.headers['authorization'] = {
+            in: 'headers',
+            description: 'Utente attualmente loggato',
+            required: true,
+            type: 'string'
+       }
+     */
     let id = req.headers.authorization;
 
     if (id !== req.params.id) return res.status(403).send("You are not allowed to delete this user!");
@@ -34,7 +47,6 @@ router.delete("/:id", async (req, res) => {
 router.get('/', async (req, res) => {
     // #swagger.tags = ['user']
     // #swagger.summary = 'Viene restituito un array di utenti'
-
     let dbClient = await new mongoClient(dbURI).connect()
     let users = await dbClient.db("SNM").collection('users').find().project({"password": 0}).toArray();
 
@@ -44,8 +56,15 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-    // #swagger.tags = ['user']
-    // #swagger.summary = 'Viene restituito un singolo utente'
+    /* #swagger.tags = ['user']
+       #swagger.summary = 'Viene restituito un singolo utente'
+       #swagger.parameters['id'] = {
+            in: 'path',
+            description: "Username o email dell\'utente di cui si vogliono i dati.",
+            required: true,
+            type: 'string'
+       }
+     */
     let id = req.params.id;
 
     let dbClient = await new mongoClient(dbURI).connect();
@@ -68,8 +87,33 @@ router.get('/:id', async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-    // #swagger.tags = ['user']
-    // #swagger.summary = 'Viene modificato il profilo di un utente'
+    /* #swagger.tags = ['user']
+       #swagger.summary = 'Viene modificato il profilo di un utente'
+       #swagger.parameters['id'] = {
+            in: 'path',
+            description: "Username o email dell\'utente da modificare.",
+            required: true,
+            type: 'string'
+       }
+       #swagger.headers['authorization'] = {
+            in: 'headers',
+            description: 'Utente attualmente loggato',
+            required: true,
+            type: 'string'
+       }
+       #swagger.parameters['body'] = {
+          in: 'body',
+          description: 'Request body',
+          required: true,
+          schema : {
+            currentPassword: 'current',
+            newPassword: 'newPsw',
+            newPassword1: 'newPsw',
+            favouriteGenres: [],
+            favouriteArtists: []
+          }
+      }
+     */
     let id = req.params.id;
     let profile = req.body;
 
