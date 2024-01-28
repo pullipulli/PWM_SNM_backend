@@ -4,9 +4,9 @@ const router = express.Router();
 const hash = require('../helpers/hash');
 const dbURI = process.env.DB_URI;
 
-// TODO implementa accesso con express-session
-
 router.post('/register', async (req, res) => {
+    // #swagger.tags = ['auth']
+    // #swagger.summary = 'Registra un utente alla piattaforma'
     let login = req.body;
 
     if (login.username === undefined) {
@@ -70,6 +70,8 @@ router.post('/register', async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
+    // #swagger.tags = ['auth']
+    // #swagger.summary = 'Fa eseguire l'accesso a SNM ad un utente'
     let login = req.body;
 
     if (login.username === undefined) {

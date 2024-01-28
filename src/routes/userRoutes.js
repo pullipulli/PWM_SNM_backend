@@ -5,7 +5,9 @@ const router = express.Router()
 const hash = require('../helpers/hash');
 
 router.delete("/:id", async (req, res) => {
-    let id = req.user.username;
+    // #swagger.tags = ['user']
+    // #swagger.summary = 'Elimino un utente specifico'
+    let id = req.headers.authorization;
 
     if (id !== req.params.id) return res.status(403).send("You are not allowed to delete this user!");
 
@@ -18,7 +20,9 @@ router.delete("/:id", async (req, res) => {
             ]
         };
 
-    let deletedUser = await dbClient.db("SNM").collection('users').project({"password": 0}).deleteOne(filter);
+    let deletedUser = await dbClient.db("SNM").collection('users').find().project({"password": 0});
+
+    await dbClient.db("SNM").collection("users").deleteOne(filter);
 
     await dbClient.close();
 
@@ -28,6 +32,9 @@ router.delete("/:id", async (req, res) => {
 })
 
 router.get('/', async (req, res) => {
+    // #swagger.tags = ['user']
+    // #swagger.summary = 'Viene restituito un array di utenti'
+
     let dbClient = await new mongoClient(dbURI).connect()
     let users = await dbClient.db("SNM").collection('users').find().project({"password": 0}).toArray();
 
@@ -37,6 +44,8 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
+    // #swagger.tags = ['user']
+    // #swagger.summary = 'Viene restituito un singolo utente'
     let id = req.params.id;
 
     let dbClient = await new mongoClient(dbURI).connect();
@@ -59,8 +68,12 @@ router.get('/:id', async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
+    // #swagger.tags = ['user']
+    // #swagger.summary = 'Viene modificato il profilo di un utente'
     let id = req.params.id;
     let profile = req.body;
+
+    if (id !== req.headers.authorization) return res.status(403).send("You are not allowed to delete this user!");
 
     let dbClient = await new mongoClient(dbURI).connect();
     let oldPassword = await dbClient.db("SNM").collection('users').find({username: id}).project({

@@ -8,17 +8,11 @@ const dbURI = process.env.DB_URI;
 const logRoute = require('./src/middlewares/logRoute');
 
 const swaggerUi = require("swagger-ui-express");
-const fs = require("fs")
-const YAML = require('yaml')
 
-const file = fs.readFileSync('./swagger.yaml', 'utf8')
-const swaggerDocument = YAML.parse(file)
-
+const swaggerDocument = require("./src/swagger-output.json");
 
 const app = express();
-const router = express.Router()
-
-//TODO aggiornare lo swagger
+const router = express.Router();
 
 const authRoutes = require('./src/routes/authRoutes');
 const userRoutes = require('./src/routes/userRoutes');

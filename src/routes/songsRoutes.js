@@ -4,6 +4,8 @@ const dbURI = process.env.DB_URI;
 const router = express.Router()
 
 router.get("/", async (req, res) => {
+    // #swagger.tags = ['songs']
+    // #swagger.summary = 'Viene restituito un array di canzoni'
     let dbClient = await new mongoClient(dbURI).connect();
     let songs = await dbClient.db("SNM").collection("songs").find().toArray();
 
@@ -15,6 +17,8 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
+    // #swagger.tags = ['songs']
+    // #swagger.summary = 'Viene restituita un\'unica canzone con un certo id'
     let id = req.params.id;
     let dbClient = await new mongoClient(dbURI).connect();
     let song = await dbClient.db("SNM").collection("songs").find({"_id": id}).toArray();

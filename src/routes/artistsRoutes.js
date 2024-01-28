@@ -4,6 +4,8 @@ const dbURI = process.env.DB_URI;
 const router = express.Router()
 
 router.get("/", async (req, res) => {
+    // #swagger.tags = ['artists']
+    // #swagger.summary = 'Viene restituito un array che contiene tutti gli artisti memorizzati nel database'
     let dbClient = await new mongoClient(dbURI).connect();
     let artists = await dbClient.db("SNM").collection("artists").find().sort('artist.name').toArray();
 

@@ -4,6 +4,8 @@ const dbURI = process.env.DB_URI;
 const router = express.Router()
 
 router.get("/:owner/:playlistName", async (req, res) => {
+    // #swagger.tags = ['playlists']
+    // #swagger.summary = 'Viene restituita una singola playlist (identificata da owner e nome della playlist)'
     const owner = req.params.owner;
     const playlistName = req.params.playlistName;
     const loggedUser = req.headers.authorization;
@@ -30,6 +32,8 @@ router.get("/:owner/:playlistName", async (req, res) => {
 });
 
 router.get("/:owner", async (req, res) => {
+    // #swagger.tags = ['playlists']
+    // #swagger.summary = 'Vengono restituite tutte le playlist dell'owner (solo quelle pubbliche se l'utente loggato non è l'owner)'
     const owner = req.params.owner;
     const loggedUser = req.headers.authorization;
 
@@ -57,6 +61,8 @@ function parseTags(stringTags) {
 }
 
 router.put("/:owner/:name", async (req, res) => {
+    // #swagger.tags = ['playlists']
+    // #swagger.summary = 'Modifico i dati di una singola playlist'
     const owner = req.params.owner;
     const oldName = req.params.name;
     const loggedUser = req.headers.authorization;
@@ -116,6 +122,8 @@ router.put("/:owner/:name", async (req, res) => {
 });
 
 router.delete("/:owner/:name", async (req, res) => {
+    // #swagger.tags = ['playlists']
+    // #swagger.summary = 'Elimino una playlist specifica'
     const owner = req.params.owner;
     const name = req.params.name;
     const loggedUser = req.headers.authorization;
@@ -160,6 +168,8 @@ router.delete("/:owner/:name", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+    // #swagger.tags = ['playlists']
+    // #swagger.summary = 'Inserisco una nuova playlist'
     let playlist = req.body;
     const loggedUser = req.headers.authorization;
 
