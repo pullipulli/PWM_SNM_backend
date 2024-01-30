@@ -45,7 +45,7 @@ router.get("/:owner/:playlistName", async (req, res) => {
 
     await dbClient.close();
 
-    if (loggedUser !== owner && playlist.privacy === 'private') return res.status(403).send("Not authorized!");
+    if (playlist && loggedUser !== owner && playlist.privacy === 'private') return res.status(403).send("Not authorized!");
 
     res.json(playlist);
 });
